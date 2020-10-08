@@ -70,7 +70,7 @@ class _SuvatFormState extends State<SuvatForm> {
   final _formKey = GlobalKey<FormState>();
 
   static Map<String, double> _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
-  List _suvatSolutions = [Map.from(_suvatValues), Map.from(_suvatValues)];
+  static List _suvatSolutions = [Map.from(_suvatValues), Map.from(_suvatValues)];
   static const Map<String, String> _suvatNames = {'s': 'Displacement', 'u': 'Initial velocity', 'v': 'Final velocity', 'a': 'Acceleration', 't': 'Time'};
 
   int countNullsInMap(Map inputMap){
@@ -192,16 +192,18 @@ class _SuvatFormState extends State<SuvatForm> {
     }
   }
 
-  int suvatCalculation(Map<String, double> values){
-    return 0;
+  void suvatCalculation(Map<String, double> values){
+    _suvatSolutions[0] = Map.from(_suvatValues);
+    _suvatSolutions[1] = Map.from(_suvatValues);
   }
-  
+
   void suvatVerify(){
     if (_formKey.currentState.validate()) {
       // perform functions below if no strings appear in the form fields
       if (countNullsInMap(_suvatValues) == 2){
         // everything looks good!
         setState(() {});
+        suvatCalculation(_suvatValues);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => SecondRoute()),
@@ -296,8 +298,43 @@ class SecondRoute extends StatelessWidget {
           },
           child: Text('Go back!'),
         ),
-        Text('Answer'),
-        Text(_SuvatFormState._suvatValues['s'].toString()),
+
+        Row(
+          children: [
+            Spacer(flex: 1),
+
+            // show solutions[0]
+            // this is inefficient - columns inside a large column
+            Column(children: [
+              for(String item in 'suvat'.split('')) Column(children: [
+                Text(
+                  _SuvatFormState._suvatNames[item].toString(),
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(_SuvatFormState._suvatSolutions[0][item].toString()),
+              ],),
+            ],),
+
+            Spacer(flex: 3),
+
+            // show solutions[1]
+            // this is inefficient - columns inside a large column
+            Column(children: [
+              for(String item in 'suvat'.split('')) Column(children: [
+                Text(
+                  _SuvatFormState._suvatNames[item].toString(),
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(_SuvatFormState._suvatSolutions[1][item].toString()),
+                //Spacer(),
+              ],),
+            ],),
+
+            Spacer(flex: 1)
+          ]
+        ),
+
+        
         ]
       ),
     );
