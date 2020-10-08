@@ -3,113 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 
-Set<double> calculate_s(Map<String, double> values, String missingVariable){
-  switch (missingVariable) {
-    case 't':
-      return {(pow(values['v'],2) - pow(values['u'],2))/(2*values['a'])};
-    case 'v':
-      return {(values['u']*values['t'] + 0.5*values['a']*pow(values['t'],2))};
-    case 'u':
-      return {(values['v']*values['t'] - 0.5*values['a']*pow(values['t'],2))};
-    case 'a':
-      return {(0.5*(values['v']+values['u'])*values['t'])};
-    default:
-      throw new Exception('Missing variable assigned invalid value in function calculate_s.');
-  }
-}
-Set<double> calculate_t(Map<String, double> values, String missingVariable){
-  switch (missingVariable) {
-    case 's':
-      return {(values['v']-values['u'])/values['a']};
-    case 'u':
-      // ambiguous case
-      double discriminant = pow(values['u'],2) - 4*0.5*values['a']*(-values['s']);
-      if (discriminant<0){
-        // no real solution
-        return {};
-      } 
-      // there is a solution (or two)
-      return {
-        (-values['u']+discriminant)/(2*0.5*values['a']),
-        (-values['u']-discriminant)/(2*0.5*values['a'])
-      };
-    case 'v':
-      // ambiguous case
-      double discriminant = pow(values['u'],2) - 4*(-0.5)*values['a']*(-values['s']);
-      if (discriminant<0){
-        // no real solution
-        return {};
-      } 
-      // there is a solution (or two)
-      return {
-        (-values['u']+discriminant)/(2*(-0.5)*values['a']),
-        (-values['u']-discriminant)/(2*(-0.5)*values['a'])
-      };
-    case 'a':
-      return {(2*values['s'])/(values['u']+values['v'])};
-    default:
-      throw new Exception('Missing variable assigned invalid value in function calculate_t.');
-  }
-}
-Set<double> calculate_u(Map<String, double> values, String missingVariable){
-  switch (missingVariable) {
-    case 's':
-      return {(values['v'] - values['a']*values['t'])};
-    case 't':
-      // ambiguous case
-      double answer;
-      answer = sqrt(pow(values['v'],2)-2*values['a']*values['s']);
-      if (answer.isNaN){
-        // no real solution
-        return {};
-      }
-      // there is a solution (or two)
-      return {answer, -answer};
-    case 'v':
-      return {(values['s']-0.5*values['a']*pow(values['t'],2))/(values['t'])};
-    case 'a':
-      return {(((2*values['s'])/values['t']) - values['v'])};
-    default:
-      throw new Exception('Missing variable assigned invalid value in function calculate_u.');
-  }
-}
-Set<double> calculate_v(Map<String, double> values, String missingVariable){
-  switch (missingVariable) {
-    case 's':
-      return {(values['u'] + values['a']*values['t'])};
-    case 't':
-      // ambiguous case
-      double answer;
-      answer = sqrt(pow(values['u'],2)+2*values['a']*values['s']);
-      if (answer.isNaN){
-        // no real solution
-        return {};
-      }
-      // there is a solution (or two)
-      return {answer, -answer};
-    case 'u':
-      return {(values['s']+0.5*values['a']*pow(values['t'],2))/(values['t'])};
-    case 'a':
-      return {(((2*values['s'])/values['t']) - values['u'])};
-    default:
-      throw new Exception('Missing variable assigned invalid value in function calculate_v.');
-  }
-}
-Set<double> calculate_a(Map<String, double> values, String missingVariable){
-  switch (missingVariable) {
-    case 's':
-      return {(values['v']-values['u'])/values['t']};
-    case 't':
-      return {(pow(values['v'],2) - pow(values['u'],2))/(2*values['s'])};
-    case 'u':
-      return {(values['s'] - values['v']*values['t'])/(-0.5*pow(values['t'],2))};
-    case 'v':
-      return {(values['s'] - values['u']*values['t'])/(0.5*pow(values['t'],2))};
-    default:
-      throw new Exception('Missing variable assigned invalid value in function calculate_a.');
-  }
-}
-
 void main() {
   runApp(MyApp());
 }
@@ -177,6 +70,7 @@ class _SuvatFormState extends State<SuvatForm> {
   final _formKey = GlobalKey<FormState>();
 
   static Map<String, double> _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
+  List _suvatSolutions = [Map.from(_suvatValues), Map.from(_suvatValues)];
   static const Map<String, String> _suvatNames = {'s': 'Displacement', 'u': 'Initial velocity', 'v': 'Final velocity', 'a': 'Acceleration', 't': 'Time'};
 
   int countNullsInMap(Map inputMap){
@@ -191,6 +85,117 @@ class _SuvatFormState extends State<SuvatForm> {
     return count;
   }
 
+  Set<double> calculate_s(Map<String, double> values, String missingVariable){
+    switch (missingVariable) {
+      case 't':
+        return {(pow(values['v'],2) - pow(values['u'],2))/(2*values['a'])};
+      case 'v':
+        return {(values['u']*values['t'] + 0.5*values['a']*pow(values['t'],2))};
+      case 'u':
+        return {(values['v']*values['t'] - 0.5*values['a']*pow(values['t'],2))};
+      case 'a':
+        return {(0.5*(values['v']+values['u'])*values['t'])};
+      default:
+        throw new Exception('Missing variable assigned invalid value in function calculate_s.');
+    }
+  }
+  Set<double> calculate_t(Map<String, double> values, String missingVariable){
+    switch (missingVariable) {
+      case 's':
+        return {(values['v']-values['u'])/values['a']};
+      case 'u':
+        // ambiguous case
+        double discriminant = pow(values['u'],2) - 4*0.5*values['a']*(-values['s']);
+        if (discriminant<0){
+          // no real solution
+          return {};
+        } 
+        // there is a solution (or two)
+        return {
+          (-values['u']+discriminant)/(2*0.5*values['a']),
+          (-values['u']-discriminant)/(2*0.5*values['a'])
+        };
+      case 'v':
+        // ambiguous case
+        double discriminant = pow(values['u'],2) - 4*(-0.5)*values['a']*(-values['s']);
+        if (discriminant<0){
+          // no real solution
+          return {};
+        } 
+        // there is a solution (or two)
+        return {
+          (-values['u']+discriminant)/(2*(-0.5)*values['a']),
+          (-values['u']-discriminant)/(2*(-0.5)*values['a'])
+        };
+      case 'a':
+        return {(2*values['s'])/(values['u']+values['v'])};
+      default:
+        throw new Exception('Missing variable assigned invalid value in function calculate_t.');
+    }
+  }
+  Set<double> calculate_u(Map<String, double> values, String missingVariable){
+    switch (missingVariable) {
+      case 's':
+        return {(values['v'] - values['a']*values['t'])};
+      case 't':
+        // ambiguous case
+        double answer;
+        answer = sqrt(pow(values['v'],2)-2*values['a']*values['s']);
+        if (answer.isNaN){
+          // no real solution
+          return {};
+        }
+        // there is a solution (or two)
+        return {answer, -answer};
+      case 'v':
+        return {(values['s']-0.5*values['a']*pow(values['t'],2))/(values['t'])};
+      case 'a':
+        return {(((2*values['s'])/values['t']) - values['v'])};
+      default:
+        throw new Exception('Missing variable assigned invalid value in function calculate_u.');
+    }
+  }
+  Set<double> calculate_v(Map<String, double> values, String missingVariable){
+    switch (missingVariable) {
+      case 's':
+        return {(values['u'] + values['a']*values['t'])};
+      case 't':
+        // ambiguous case
+        double answer;
+        answer = sqrt(pow(values['u'],2)+2*values['a']*values['s']);
+        if (answer.isNaN){
+          // no real solution
+          return {};
+        }
+        // there is a solution (or two)
+        return {answer, -answer};
+      case 'u':
+        return {(values['s']+0.5*values['a']*pow(values['t'],2))/(values['t'])};
+      case 'a':
+        return {(((2*values['s'])/values['t']) - values['u'])};
+      default:
+        throw new Exception('Missing variable assigned invalid value in function calculate_v.');
+    }
+  }
+  Set<double> calculate_a(Map<String, double> values, String missingVariable){
+    switch (missingVariable) {
+      case 's':
+        return {(values['v']-values['u'])/values['t']};
+      case 't':
+        return {(pow(values['v'],2) - pow(values['u'],2))/(2*values['s'])};
+      case 'u':
+        return {(values['s'] - values['v']*values['t'])/(-0.5*pow(values['t'],2))};
+      case 'v':
+        return {(values['s'] - values['u']*values['t'])/(0.5*pow(values['t'],2))};
+      default:
+        throw new Exception('Missing variable assigned invalid value in function calculate_a.');
+    }
+  }
+
+  int suvatCalculation(Map<String, double> values){
+    return 0;
+  }
+  
   void suvatVerify(){
     if (_formKey.currentState.validate()) {
       // perform functions below if no strings appear in the form fields
@@ -225,9 +230,6 @@ class _SuvatFormState extends State<SuvatForm> {
     }
   }
 
-  int suvatCalculation(Map<String, double> values){
-    return 0;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -241,10 +243,12 @@ class _SuvatFormState extends State<SuvatForm> {
             validator: (value) {
               if (value != '') {
                 if (double.tryParse(value) == null){
-                return 'Value must be a number';
+                  return 'Value must be a number';
                 }
-              _suvatValues[item] = double.parse(value);
+                _suvatValues[item] = double.parse(value);
+                return null;
               }
+              _suvatValues[item] = null;
               return null;
             },
             decoration: InputDecoration(
