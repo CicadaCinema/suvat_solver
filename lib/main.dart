@@ -71,6 +71,7 @@ class _SuvatFormState extends State<SuvatForm> {
 
   static Map<String, double> _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
   static List _suvatSolutions = [Map.from(_suvatValues), Map.from(_suvatValues)];
+  static bool _ambiguousCase = false;
   static const Map<String, String> _suvatNames = {'s': 'Displacement', 'u': 'Initial velocity', 'v': 'Final velocity', 'a': 'Acceleration', 't': 'Time'};
 
   int countNullsInMap(Map inputMap){
@@ -193,8 +194,55 @@ class _SuvatFormState extends State<SuvatForm> {
   }
 
   void suvatCalculation(Map<String, double> values){
+    // ambiguous case when t AND u/v are unknown
+    _ambiguousCase = values['t']==null && (values['u']==null || values['v']==null);
+
+    // find missing variables
+    List<String> missingVariablesNames = [];
+    values.forEach((key, value) {
+      if (value == null){
+        missingVariablesNames.add(key);
+      }
+    });
+
+    // set the first three values
     _suvatSolutions[0] = Map.from(_suvatValues);
-    _suvatSolutions[1] = Map.from(_suvatValues);
+
+    if (_ambiguousCase){
+      // placeholder
+      _suvatSolutions[0] = Map.from(_suvatValues);
+      _suvatSolutions[1] = Map.from(_suvatValues);
+    } else {
+      // clear the second solution set
+      values.forEach((key, value) {
+        _suvatSolutions[1][key] = null;
+      });
+
+      // calculate answer as usual
+      values.forEach((key, value) {
+        if (missingVariablesNames.contains(key)){
+          String otherUnknown = missingVariablesNames[1-missingVariablesNames.indexOf(key)];
+          switch (key) {
+            case 's':
+              _suvatSolutions[0][key] = calculate_s(values, otherUnknown).first;
+              break;
+            case 'u':
+              _suvatSolutions[0][key] = calculate_u(values, otherUnknown).first;
+              break;
+            case 'v':
+              _suvatSolutions[0][key] = calculate_v(values, otherUnknown).first;
+              break;
+            case 'a':
+              _suvatSolutions[0][key] = calculate_a(values, otherUnknown).first;
+              break;
+            case 't':
+              _suvatSolutions[0][key] = calculate_t(values, otherUnknown).first;
+              break;
+          }
+        }
+      });
+    }
+
   }
 
   void suvatVerify(){
@@ -301,10 +349,11 @@ class SecondRoute extends StatelessWidget {
 
         Row(
           children: [
-            Spacer(flex: 1),
+            // ALL this is inefficient - columns inside a large column
+
+            Spacer(flex: 2),
 
             // show solutions[0]
-            // this is inefficient - columns inside a large column
             Column(children: [
               for(String item in 'suvat'.split('')) Column(children: [
                 Text(
@@ -315,22 +364,20 @@ class SecondRoute extends StatelessWidget {
               ],),
             ],),
 
-            Spacer(flex: 3),
+            _SuvatFormState._ambiguousCase? Spacer(flex: 3): SizedBox.shrink(),
 
-            // show solutions[1]
-            // this is inefficient - columns inside a large column
-            Column(children: [
+            // show solutions[1] - only if this is an ambiguous case
+            _SuvatFormState._ambiguousCase? Column(children: [
               for(String item in 'suvat'.split('')) Column(children: [
                 Text(
                   _SuvatFormState._suvatNames[item].toString(),
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(_SuvatFormState._suvatSolutions[1][item].toString()),
-                //Spacer(),
               ],),
-            ],),
+            ],):SizedBox.shrink(),
 
-            Spacer(flex: 1)
+            Spacer(flex: 2)
           ]
         ),
 
