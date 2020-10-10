@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
       children: <Widget>[
         SuvatForm(),
           RaisedButton(
-            child: Text(_SuvatFormState._suvatValues['s'].toString()),
+            child: Text('View previous solution(s)'),
             color: Colors.blue,
             onPressed: () {
               Navigator.push(
@@ -316,7 +316,7 @@ class _SuvatFormState extends State<SuvatForm> {
                 onPressed: () {
                   suvatVerify();  
                 },
-                child: Text('Submit and go to the second page'),
+                child: Text('Submit and view solution'),
               ),
               RaisedButton(
                 onPressed: () {
@@ -327,7 +327,6 @@ class _SuvatFormState extends State<SuvatForm> {
               ),
             ],)
           ),
-          Text(_suvatValues['s'].toString()),
         ],
       ),
     );
@@ -352,7 +351,8 @@ class SecondRoute extends StatelessWidget {
 
         Row(
           children: [
-            // ALL this is inefficient - columns inside a large column
+            // ALL this is A BIG MESS - columns inside a large column
+            // TODO: turn this into a function to dispay either one or two solutions
 
             Spacer(flex: 2),
 
