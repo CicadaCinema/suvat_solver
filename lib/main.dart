@@ -106,27 +106,27 @@ class _SuvatFormState extends State<SuvatForm> {
         return {(values['v']-values['u'])/values['a']};
       case 'u':
         // ambiguous case
-        double discriminant = pow(values['u'],2) - 4*0.5*values['a']*(-values['s']);
+        double discriminant = pow(values['v'], 2) - 4*(-0.5*values['a'])*(-values['s']);
         if (discriminant<0){
           // no real solution
           return {};
         } 
         // there is a solution (or two)
         return {
-          (-values['u']+discriminant)/(2*0.5*values['a']),
-          (-values['u']-discriminant)/(2*0.5*values['a'])
+          (-values['v']+sqrt(discriminant))/(2*0.5*values['a']),
+          (-values['v']-sqrt(discriminant))/(2*0.5*values['a'])
         };
       case 'v':
         // ambiguous case
-        double discriminant = pow(values['u'],2) - 4*(-0.5)*values['a']*(-values['s']);
+        double discriminant = pow(values['u'], 2) - 4*(0.5*values['a'])*(-values['s']);
         if (discriminant<0){
           // no real solution
           return {};
         } 
         // there is a solution (or two)
         return {
-          (-values['u']+discriminant)/(2*(-0.5)*values['a']),
-          (-values['u']-discriminant)/(2*(-0.5)*values['a'])
+          (-values['u']+sqrt(discriminant))/(2*(0.5*values['a'])),
+          (-values['u']-sqrt(discriminant))/(2*(0.5*values['a']))
         };
       case 'a':
         return {(2*values['s'])/(values['u']+values['v'])};
