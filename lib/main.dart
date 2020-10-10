@@ -101,38 +101,41 @@ class _SuvatFormState extends State<SuvatForm> {
     }
   }
   Set<double> calculate_t(Map<String, double> values, String missingVariable){
+    // set up coefficients in case of a quadratic
+    double a, b, c;
+
     switch (missingVariable) {
       case 's':
         return {(values['v']-values['u'])/values['a']};
       case 'u':
-        // ambiguous case
-        double discriminant = pow(values['v'], 2) - 4*(-0.5*values['a'])*(-values['s']);
-        if (discriminant<0){
-          // no real solution
-          return {};
-        } 
-        // there is a solution (or two)
-        return {
-          (-values['v']+sqrt(discriminant))/(2*0.5*values['a']),
-          (-values['v']-sqrt(discriminant))/(2*0.5*values['a'])
-        };
+        // ambiguous case - define a quadratic in t
+        a = -0.5*values['a'];
+        b = values['v'];
+        c = -values['s'];
+        break;
       case 'v':
-        // ambiguous case
-        double discriminant = pow(values['u'], 2) - 4*(0.5*values['a'])*(-values['s']);
-        if (discriminant<0){
-          // no real solution
-          return {};
-        } 
-        // there is a solution (or two)
-        return {
-          (-values['u']+sqrt(discriminant))/(2*(0.5*values['a'])),
-          (-values['u']-sqrt(discriminant))/(2*(0.5*values['a']))
-        };
+        // ambiguous case - define a quadratic in t
+        a = 0.5*values['a'];
+        b = values['u'];
+        c = -values['s'];
+        break;
       case 'a':
         return {(2*values['s'])/(values['u']+values['v'])};
       default:
         throw new Exception('Missing variable assigned invalid value in function calculate_t.');
     }
+
+    // ignore: dead_code
+    double discriminant = pow(b, 2) - 4*a*c;
+    if (discriminant<0){
+      // no real solution
+      return {};
+    }
+    // return the solutions to the quadratic
+    return {
+      (-b+sqrt(discriminant))/(2*a),
+      (-b-sqrt(discriminant))/(2*a)
+    };
   }
   Set<double> calculate_u(Map<String, double> values, String missingVariable){
     switch (missingVariable) {
