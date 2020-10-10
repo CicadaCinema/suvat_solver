@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       primarySwatch: Colors.blue,
       visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Suvat Solver Home Page'),
+      home: MyHomePage(title: 'Solver'),
     );
   }
 }
@@ -86,7 +86,7 @@ class _SuvatFormState extends State<SuvatForm> {
     return count;
   }
 
-  Set<double> calculate_s(Map<String, double> values, String missingVariable){
+  Set<double> calculateS(Map<String, double> values, String missingVariable){
     switch (missingVariable) {
       case 't':
         return {(pow(values['v'],2) - pow(values['u'],2))/(2*values['a'])};
@@ -97,10 +97,10 @@ class _SuvatFormState extends State<SuvatForm> {
       case 'a':
         return {(0.5*(values['v']+values['u'])*values['t'])};
       default:
-        throw new Exception('Missing variable assigned invalid value in function calculate_s.');
+        throw new Exception('Missing variable assigned invalid value in function calculateS.');
     }
   }
-  Set<double> calculate_t(Map<String, double> values, String missingVariable){
+  Set<double> calculateT(Map<String, double> values, String missingVariable){
     // set up coefficients in case of a quadratic
     double a, b, c;
 
@@ -122,7 +122,7 @@ class _SuvatFormState extends State<SuvatForm> {
       case 'a':
         return {(2*values['s'])/(values['u']+values['v'])};
       default:
-        throw new Exception('Missing variable assigned invalid value in function calculate_t.');
+        throw new Exception('Missing variable assigned invalid value in function calculateT.');
     }
 
     // ignore: dead_code
@@ -137,12 +137,15 @@ class _SuvatFormState extends State<SuvatForm> {
       (-b-sqrt(discriminant))/(2*a)
     };
   }
-  Set<double> calculate_u(Map<String, double> values, String missingVariable){
+  Set<double> calculateU(Map<String, double> values, String missingVariable){
     switch (missingVariable) {
       case 's':
         return {(values['v'] - values['a']*values['t'])};
       case 't':
+        // heed this exception, but the code below can stay
+        throw new Exception('This case should never be reached. For unknown u/v and t, t is always calculated first.');
         // ambiguous case
+        // ignore: dead_code
         double answer;
         answer = sqrt(pow(values['v'],2)-2*values['a']*values['s']);
         if (answer.isNaN){
@@ -156,15 +159,18 @@ class _SuvatFormState extends State<SuvatForm> {
       case 'a':
         return {(((2*values['s'])/values['t']) - values['v'])};
       default:
-        throw new Exception('Missing variable assigned invalid value in function calculate_u.');
+        throw new Exception('Missing variable assigned invalid value in function calculateU.');
     }
   }
-  Set<double> calculate_v(Map<String, double> values, String missingVariable){
+  Set<double> calculateV(Map<String, double> values, String missingVariable){
     switch (missingVariable) {
       case 's':
         return {(values['u'] + values['a']*values['t'])};
       case 't':
+        // heed this exception, but the code below can stay
+        throw new Exception('This case should never be reached. For unknown u/v and t, t is always calculated first.');
         // ambiguous case
+        // ignore: dead_code
         double answer;
         answer = sqrt(pow(values['u'],2)+2*values['a']*values['s']);
         if (answer.isNaN){
@@ -178,10 +184,10 @@ class _SuvatFormState extends State<SuvatForm> {
       case 'a':
         return {(((2*values['s'])/values['t']) - values['u'])};
       default:
-        throw new Exception('Missing variable assigned invalid value in function calculate_v.');
+        throw new Exception('Missing variable assigned invalid value in function calculateV.');
     }
   }
-  Set<double> calculate_a(Map<String, double> values, String missingVariable){
+  Set<double> calculateA(Map<String, double> values, String missingVariable){
     switch (missingVariable) {
       case 's':
         return {(values['v']-values['u'])/values['t']};
@@ -192,7 +198,7 @@ class _SuvatFormState extends State<SuvatForm> {
       case 'v':
         return {(values['s'] - values['u']*values['t'])/(0.5*pow(values['t'],2))};
       default:
-        throw new Exception('Missing variable assigned invalid value in function calculate_a.');
+        throw new Exception('Missing variable assigned invalid value in function calculateA.');
     }
   }
 
@@ -222,23 +228,23 @@ class _SuvatFormState extends State<SuvatForm> {
       switch (otherUnknown) {
         // TODO: this is very repetitive
         case 'u':
-          tSolutions = calculate_t(values, 'u');
+          tSolutions = calculateT(values, 'u');
 
           _suvatSolutions[0]['t'] = tSolutions.first;
           _suvatSolutions[1]['t'] = tSolutions.last;
 
           // t is now known, so there is only one possible u for each solution
-          _suvatSolutions[0]['u'] = calculate_u(_suvatSolutions[0], 's').first;
-          _suvatSolutions[1]['u'] = calculate_u(_suvatSolutions[1], 's').last;
+          _suvatSolutions[0]['u'] = calculateU(_suvatSolutions[0], 's').first;
+          _suvatSolutions[1]['u'] = calculateU(_suvatSolutions[1], 's').last;
           break;
         case 'v':
-          tSolutions = calculate_t(values, 'v');
+          tSolutions = calculateT(values, 'v');
           _suvatSolutions[0]['t'] = tSolutions.first;
           _suvatSolutions[1]['t'] = tSolutions.last;
 
           // t is now known, so there is only one possible u for each solution
-          _suvatSolutions[0]['v'] = calculate_v(_suvatSolutions[0], 's').first;
-          _suvatSolutions[1]['v'] = calculate_v(_suvatSolutions[1], 's').last;
+          _suvatSolutions[0]['v'] = calculateV(_suvatSolutions[0], 's').first;
+          _suvatSolutions[1]['v'] = calculateV(_suvatSolutions[1], 's').last;
           break;
       }
     } else {
@@ -253,19 +259,19 @@ class _SuvatFormState extends State<SuvatForm> {
           String otherUnknown = missingVariablesNames[1-missingVariablesNames.indexOf(key)];
           switch (key) {
             case 's':
-              _suvatSolutions[0][key] = calculate_s(values, otherUnknown).first;
+              _suvatSolutions[0][key] = calculateS(values, otherUnknown).first;
               break;
             case 'u':
-              _suvatSolutions[0][key] = calculate_u(values, otherUnknown).first;
+              _suvatSolutions[0][key] = calculateU(values, otherUnknown).first;
               break;
             case 'v':
-              _suvatSolutions[0][key] = calculate_v(values, otherUnknown).first;
+              _suvatSolutions[0][key] = calculateV(values, otherUnknown).first;
               break;
             case 'a':
-              _suvatSolutions[0][key] = calculate_a(values, otherUnknown).first;
+              _suvatSolutions[0][key] = calculateA(values, otherUnknown).first;
               break;
             case 't':
-              _suvatSolutions[0][key] = calculate_t(values, otherUnknown).first;
+              _suvatSolutions[0][key] = calculateT(values, otherUnknown).first;
               break;
           }
         }
