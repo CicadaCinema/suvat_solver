@@ -208,13 +208,39 @@ class _SuvatFormState extends State<SuvatForm> {
       }
     });
 
-    // set the first three values
-    _suvatSolutions[0] = Map.from(_suvatValues);
+    // assign known values to both solution sets
+    // two additional maps must be created to explicitly copy the 'values' map instead of referencing it
+    Map<String, double> map1 = new Map.from(values);
+    Map<String, double> map2 = new Map.from(values);
+    _suvatSolutions[0] = map1;
+    _suvatSolutions[1] = map2;
 
     if (_ambiguousCase){
-      // placeholder
-      _suvatSolutions[0] = Map.from(_suvatValues);
-      _suvatSolutions[1] = Map.from(_suvatValues);
+      // find out t
+      Set<double> tSolutions;
+      String otherUnknown = missingVariablesNames[1-missingVariablesNames.indexOf('t')];
+      switch (otherUnknown) {
+        // TODO: this is very repetitive
+        case 'u':
+          tSolutions = calculate_t(values, 'u');
+
+          _suvatSolutions[0]['t'] = tSolutions.first;
+          _suvatSolutions[1]['t'] = tSolutions.last;
+
+          // t is now known, so there is only one possible u for each solution
+          _suvatSolutions[0]['u'] = calculate_u(_suvatSolutions[0], 's').first;
+          _suvatSolutions[1]['u'] = calculate_u(_suvatSolutions[1], 's').last;
+          break;
+        case 'v':
+          tSolutions = calculate_t(values, 'v');
+          _suvatSolutions[0]['t'] = tSolutions.first;
+          _suvatSolutions[1]['t'] = tSolutions.last;
+
+          // t is now known, so there is only one possible u for each solution
+          _suvatSolutions[0]['v'] = calculate_v(_suvatSolutions[0], 's').first;
+          _suvatSolutions[1]['v'] = calculate_v(_suvatSolutions[1], 's').last;
+          break;
+      }
     } else {
       // clear the second solution set
       values.forEach((key, value) {
@@ -245,7 +271,6 @@ class _SuvatFormState extends State<SuvatForm> {
         }
       });
     }
-
   }
 
   void suvatVerify(){
