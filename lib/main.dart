@@ -13,8 +13,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Suvat Solver',
       theme: ThemeData(
-      primarySwatch: Colors.blue,
-      visualDensity: VisualDensity.adaptivePlatformDensity,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        primarySwatch: Colors.indigo,
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.indigo,
+          textTheme: ButtonTextTheme.primary,
+        ),
       ),
       home: MyHomePage(title: 'Solver'),
     );
@@ -39,17 +43,37 @@ class _MyHomePageState extends State<MyHomePage> {
     body: Column(
       children: <Widget>[
         SuvatForm(),
-          RaisedButton(
-            child: Text('View previous solution(s)'),
-            color: Colors.blue,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SecondRoute()),
-              );
-            },
+        Spacer(),
+        Row(children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 5),
+            child: RaisedButton(
+              child: Text('Submit and view solution'),
+              onPressed: null
+            ),
           ),
-        ],
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 5),
+            child: RaisedButton(
+              child: Text('Reset'),
+              onPressed: null
+            ),
+          ),
+          Spacer(),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 5),
+            child: RaisedButton(
+              child: Text('View previous solution(s)'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SecondRoute()),
+                );
+              },
+            ),
+          ),
+        ],)
+      ],
     ),
   );
   }
@@ -369,7 +393,7 @@ class SecondRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Second Route"),
+        title: Text("Solutions"),
       ),
       body: Column(
         children: [
