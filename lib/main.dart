@@ -325,11 +325,6 @@ class _SuvatFormState extends State<SuvatForm> {
                 ),
               ),
             ],),
-        /* Row(
-        children: [
-          IconButton(icon: Icon(Icons.refresh), onPressed: () {}),
-          RaisedButton(child: Icon(Icons.undo), onPressed: () {}),
-        ], */
     );
   }
 
@@ -338,7 +333,7 @@ class _SuvatFormState extends State<SuvatForm> {
       onPressed: () {
         suvatVerify();
       },
-      label: Text('Submit'),
+      label: Text('Submit!'),
       icon: Icon(Icons.check),
       backgroundColor: Colors.pink,
     );
@@ -403,7 +398,6 @@ class SecondRoute extends StatelessWidget {
     return new Column(children: columnItems);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -425,16 +419,18 @@ class SecondRoute extends StatelessWidget {
                 Spacer(flex: 2)
               ]
             ),
-            Spacer(),
-            RaisedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Go back!'),
-            ),
           ]
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        label: Text('Go back!'),
+        icon: Icon(Icons.arrow_back),
+        backgroundColor: Colors.pink,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
