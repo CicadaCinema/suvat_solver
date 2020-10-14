@@ -407,7 +407,7 @@ class SecondRoute extends StatelessWidget {
                 // show large spacer - only if this is an ambiguous case
                 _SuvatFormState._ambiguousCase? Spacer(flex: 3): SizedBox.shrink(),
                 // show solutions[1] - only if this is an ambiguous case
-                _SuvatFormState._ambiguousCase? showSolutionBlock(_SuvatFormState._suvatSolutions[0]):SizedBox.shrink(),
+                _SuvatFormState._ambiguousCase? showSolutionBlock(_SuvatFormState._suvatSolutions[1]):SizedBox.shrink(),
                 Spacer(flex: 2)
               ]
             ),
