@@ -36,12 +36,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-    title: Text(widget.title),
-    ),
-    body: SuvatForm(),
-  );
+    return SuvatForm();
   }
 }
 
@@ -304,10 +299,54 @@ class _SuvatFormState extends State<SuvatForm> {
     }
   }
 
+  Widget bottomBar() {
+    return BottomAppBar(
+      child: Row(children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: RaisedButton(
+                  child: Text('Reset'),
+                  onPressed: () {
+                    _formKey.currentState.reset();
+                    _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
+                  }
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: RaisedButton(
+                  child: Text('View Previous'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SecondRoute()),
+                    );
+                  },
+                ),
+              ),
+            ],),
+        /* Row(
+        children: [
+          IconButton(icon: Icon(Icons.refresh), onPressed: () {}),
+          RaisedButton(child: Icon(Icons.undo), onPressed: () {}),
+        ], */
+    );
+  }
+
+  Widget submitButton() {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        suvatVerify();
+      },
+      label: Text('Submit'),
+      icon: Icon(Icons.check),
+      backgroundColor: Colors.pink,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
+    Widget form = Form(
       key: _formKey,
       child: Container(
         padding: EdgeInsets.all(10),
@@ -331,43 +370,18 @@ class _SuvatFormState extends State<SuvatForm> {
               ), 
             ),
             Spacer(),
-            Row(children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: RaisedButton(
-                  child: Text('Submit'),
-                  onPressed: (){
-                    suvatVerify();
-                  }
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: RaisedButton(
-                  child: Text('Reset'),
-                  onPressed: () {
-                    _formKey.currentState.reset();
-                    _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
-                  }
-                ),
-              ),
-              Spacer(),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: RaisedButton(
-                  child: Text('View previous'),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SecondRoute()),
-                    );
-                  },
-                ),
-              ),
-            ],)
           ],
         ),
       )
+    );
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Solver'),
+      ),
+      body: form,
+      bottomNavigationBar: bottomBar(),
+      floatingActionButton: submitButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 }
