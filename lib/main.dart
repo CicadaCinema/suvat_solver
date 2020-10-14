@@ -373,58 +373,53 @@ class _SuvatFormState extends State<SuvatForm> {
 }
 
 class SecondRoute extends StatelessWidget {
+  Widget showSolutionBlock(Map<String, double> solutionSet)
+  {
+    List<Widget> columnItems = new List<Widget>();
+
+    for(String item in 'suvat'.split('')) {
+      columnItems.add(SizedBox(height: 10));
+      columnItems.add(Text(
+                    _SuvatFormState._suvatNames[item].toString(),
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ));
+      columnItems.add(Text(solutionSet[item].toString()));
+    }
+
+    return new Column(children: columnItems);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Solutions"),
       ),
-      body: Column(
-        children: [
-          RaisedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text('Go back!'),
-        ),
-
-        Row(
+      body: Container(
+        padding: EdgeInsets.all(10),
+        child: Column(
           children: [
-            // ALL this is A BIG MESS - columns inside a large column
-            // TODO: turn this into a function to dispay either one or two solutions
-
-            Spacer(flex: 2),
-
-            // show solutions[0]
-            Column(children: [
-              for(String item in 'suvat'.split('')) Column(children: [
-                Text(
-                  _SuvatFormState._suvatNames[item].toString(),
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(_SuvatFormState._suvatSolutions[0][item].toString()),
-              ],),
-            ],),
-
-            _SuvatFormState._ambiguousCase? Spacer(flex: 3): SizedBox.shrink(),
-
-            // show solutions[1] - only if this is an ambiguous case
-            _SuvatFormState._ambiguousCase? Column(children: [
-              for(String item in 'suvat'.split('')) Column(children: [
-                Text(
-                  _SuvatFormState._suvatNames[item].toString(),
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(_SuvatFormState._suvatSolutions[1][item].toString()),
-              ],),
-            ],):SizedBox.shrink(),
-
-            Spacer(flex: 2)
+            Row(
+              children: [
+                Spacer(flex: 2),
+                showSolutionBlock(_SuvatFormState._suvatSolutions[0]),
+                // show large spacer - only if this is an ambiguous case
+                _SuvatFormState._ambiguousCase? Spacer(flex: 3): SizedBox.shrink(),
+                // show solutions[1] - only if this is an ambiguous case
+                _SuvatFormState._ambiguousCase? showSolutionBlock(_SuvatFormState._suvatSolutions[0]):SizedBox.shrink(),
+                Spacer(flex: 2)
+              ]
+            ),
+            Spacer(),
+            RaisedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Go back!'),
+            ),
           ]
         ),
-
-        
-        ]
       ),
     );
   }
