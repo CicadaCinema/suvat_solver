@@ -40,41 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
     appBar: AppBar(
     title: Text(widget.title),
     ),
-    body: Column(
-      children: <Widget>[
-        SuvatForm(),
-        Spacer(),
-        Row(children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 5),
-            child: RaisedButton(
-              child: Text('Submit and view solution'),
-              onPressed: null
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 5),
-            child: RaisedButton(
-              child: Text('Reset'),
-              onPressed: null
-            ),
-          ),
-          Spacer(),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 5),
-            child: RaisedButton(
-              child: Text('View previous solution(s)'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SecondRoute()),
-                );
-              },
-            ),
-          ),
-        ],)
-      ],
-    ),
+    body: SuvatForm(),
   );
   }
 }
@@ -343,47 +309,65 @@ class _SuvatFormState extends State<SuvatForm> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
-        children: <Widget>[
-
-          // create lots of TextFormField textboxes
-          for(String item in 'suvat'.split('')) TextFormField(
-            validator: (value) {
-              if (value != '') {
-                if (double.tryParse(value) == null){
-                  return 'Value must be a number';
+      child: Container(
+        padding: EdgeInsets.all(10),
+        child: Column(
+          children: <Widget>[
+            // create lots of TextFormField textboxes
+            for(String item in 'suvat'.split('')) TextFormField(
+              validator: (value) {
+                if (value != '') {
+                  if (double.tryParse(value) == null){
+                    return 'Value must be a number';
+                  }
+                  _suvatValues[item] = double.parse(value);
+                  return null;
                 }
-                _suvatValues[item] = double.parse(value);
+                _suvatValues[item] = null;
                 return null;
-              }
-              _suvatValues[item] = null;
-              return null;
-            },
-            decoration: InputDecoration(
-              labelText: _suvatNames[item],
-            ), 
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Row(children: [
-              RaisedButton(
-                onPressed: () {
-                  suvatVerify();  
-                },
-                child: Text('Submit and view solution'),
+              },
+              decoration: InputDecoration(
+                labelText: _suvatNames[item],
+              ), 
+            ),
+            Spacer(),
+            Row(children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: RaisedButton(
+                  child: Text('Submit'),
+                  onPressed: (){
+                    suvatVerify();
+                  }
+                ),
               ),
-              RaisedButton(
-                onPressed: () {
-                  _formKey.currentState.reset();
-                  _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
-                },
-                child: Text('Reset'),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: RaisedButton(
+                  child: Text('Reset'),
+                  onPressed: () {
+                    _formKey.currentState.reset();
+                    _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
+                  }
+                ),
+              ),
+              Spacer(),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+                child: RaisedButton(
+                  child: Text('View previous'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SecondRoute()),
+                    );
+                  },
+                ),
               ),
             ],)
-          ),
-        ],
-      ),
+          ],
+        ),
+      )
     );
   }
 }
