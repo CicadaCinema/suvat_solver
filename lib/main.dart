@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // define app title and theme data
       title: 'Suvat Solver',
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -20,26 +21,28 @@ class MyApp extends StatelessWidget {
           textTheme: ButtonTextTheme.primary,
         ),
       ),
-      home: MyHomePage(title: 'Solver'),
+      // initially go to form page - to get inputs from user
+      home: FormPage(title: 'Solver'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class FormPage extends StatefulWidget {
+  FormPage({Key key, this.title}) : super(key: key);
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _FormPageState createState() => _FormPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _FormPageState extends State<FormPage> {
   @override
   Widget build(BuildContext context) {
     return SuvatForm();
   }
 }
 
+// an exception with custom text
 class CustomException implements Exception {
   String cause;
   CustomException(this.cause);
@@ -51,14 +54,17 @@ class SuvatForm extends StatefulWidget {
 }
 
 class _SuvatFormState extends State<SuvatForm> {
-
+  // this form key helps with form-related methods
   final _formKey = GlobalKey<FormState>();
 
+  // a template map to store the user's inputs
   static Map<String, double> _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
+  // explicitly create two copies of the map above
   static List _suvatSolutions = [Map.from(_suvatValues), Map.from(_suvatValues)];
   static bool _ambiguousCase = false;
   static const Map<String, String> _suvatNames = {'s': 'Displacement', 'u': 'Initial velocity', 'v': 'Final velocity', 'a': 'Acceleration', 't': 'Time'};
 
+  // this method simply counts the number of null values in a map
   int countNullsInMap(Map inputMap){
     int count = 0;
 
@@ -71,6 +77,13 @@ class _SuvatFormState extends State<SuvatForm> {
     return count;
   }
 
+  /*
+  these methods take in a map containing the known suvat values and a string
+  with the 'missing variable' - the one that's not involved in the calculation;
+  they return a set containing the value of the desired variable (eg calculateS
+  will always return a set containings solutions for s);
+  sometimes the length of the returned set is 1, sometimes it is 2
+  */
   Set<double> calculateS(Map<String, double> values, String missingVariable){
     switch (missingVariable) {
       case 't':
@@ -187,11 +200,13 @@ class _SuvatFormState extends State<SuvatForm> {
     }
   }
 
+  // TODO: implement a warning when the user enters impossible values
+  // this method 
   void suvatCalculation(Map<String, double> values){
-    // ambiguous case when t AND u/v are unknown
+    // ambiguous case is when t AND u/v are unknown
     _ambiguousCase = values['t']==null && (values['u']==null || values['v']==null);
 
-    // find missing variables
+    // find missing variables and add their keys/names to a list
     List<String> missingVariablesNames = [];
     values.forEach((key, value) {
       if (value == null){
@@ -200,15 +215,16 @@ class _SuvatFormState extends State<SuvatForm> {
     });
 
     // assign known values to both solution sets
-    // two additional maps must be created to explicitly copy the 'values' map instead of referencing it
+    // two additional maps must be explicitly created to copy the 'values' map instead of referencing it
     Map<String, double> map1 = new Map.from(values);
     Map<String, double> map2 = new Map.from(values);
     _suvatSolutions[0] = map1;
     _suvatSolutions[1] = map2;
 
     if (_ambiguousCase){
-      // find out t
+      // the time variable is always unknown in an ambiguous case
       Set<double> tSolutions;
+      // get the key of the other unknown variable from the list created earlier
       String otherUnknown = missingVariablesNames[1-missingVariablesNames.indexOf('t')];
       switch (otherUnknown) {
         // TODO: this is very repetitive
@@ -224,6 +240,7 @@ class _SuvatFormState extends State<SuvatForm> {
           break;
         case 'v':
           tSolutions = calculateT(values, 'v');
+
           _suvatSolutions[0]['t'] = tSolutions.first;
           _suvatSolutions[1]['t'] = tSolutions.last;
 
@@ -233,7 +250,7 @@ class _SuvatFormState extends State<SuvatForm> {
           break;
       }
     } else {
-      // clear the second solution set
+      // clear the second solution set because it won't be used
       values.forEach((key, value) {
         _suvatSolutions[1][key] = null;
       });
@@ -328,6 +345,7 @@ class _SuvatFormState extends State<SuvatForm> {
     );
   }
 
+  // the large 'Submit' button
   Widget submitButton() {
     return FloatingActionButton.extended(
       onPressed: () {
@@ -381,6 +399,8 @@ class _SuvatFormState extends State<SuvatForm> {
   }
 }
 
+// this stateless widget takes solutions from the state of the suvat form
+// and displays them
 class SecondRoute extends StatelessWidget {
   Widget showSolutionBlock(Map<String, double> solutionSet)
   {
@@ -394,7 +414,6 @@ class SecondRoute extends StatelessWidget {
                   ));
       columnItems.add(Text(solutionSet[item].toString()));
     }
-
     return new Column(children: columnItems);
   }
 
