@@ -9,6 +9,7 @@ class CustomException implements Exception {
   CustomException(this.cause);
 }
 
+// TODO: component/unit testing??
 void main() {
   runApp(MyApp());
 }
@@ -47,8 +48,7 @@ class _SuvatFormState extends State<SuvatForm> {
 
   // a template map to store the user's inputs
   static Map<String, double> _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
-  // explicitly create two copies of the map above
-  static List _suvatSolutions = [Map.from(_suvatValues), Map.from(_suvatValues)];
+  static List _suvatSolutions = new List(2);
   static bool _ambiguousCase = false;
   static const Map<String, String> _suvatNames = {'s': 'Displacement', 'u': 'Initial velocity', 'v': 'Final velocity', 'a': 'Acceleration', 't': 'Time'};
 
@@ -189,7 +189,8 @@ class _SuvatFormState extends State<SuvatForm> {
   }
 
   // TODO: implement a warning when the user enters impossible values
-  // this method 
+  // this method uses the individual components above to assemble solutions
+  // these are saved in _suvatSolutions rather than being returned by the function
   void suvatCalculation(Map<String, double> values){
     // ambiguous case is when t AND u/v are unknown
     _ambiguousCase = values['t']==null && (values['u']==null || values['v']==null);
@@ -210,31 +211,25 @@ class _SuvatFormState extends State<SuvatForm> {
     _suvatSolutions[1] = map2;
 
     if (_ambiguousCase){
-      // the time variable is always unknown in an ambiguous case
+      // the time variable (t) is always unknown in an ambiguous case
       Set<double> tSolutions;
       // get the key of the other unknown variable from the list created earlier
       String otherUnknown = missingVariablesNames[1-missingVariablesNames.indexOf('t')];
+
+      // find the two possible values of t
+      tSolutions = calculateT(values, otherUnknown);
+      _suvatSolutions[0]['t'] = tSolutions.first;
+      _suvatSolutions[1]['t'] = tSolutions.last;
+
+      // t is now known, so there is only one possible u/v value for each solution
       switch (otherUnknown) {
-        // TODO: this is very repetitive
         case 'u':
-          tSolutions = calculateT(values, 'u');
-
-          _suvatSolutions[0]['t'] = tSolutions.first;
-          _suvatSolutions[1]['t'] = tSolutions.last;
-
-          // t is now known, so there is only one possible u for each solution
-          _suvatSolutions[0]['u'] = calculateU(_suvatSolutions[0], 's').first;
-          _suvatSolutions[1]['u'] = calculateU(_suvatSolutions[1], 's').last;
+          _suvatSolutions[0][otherUnknown] = calculateU(_suvatSolutions[0], 's').first;
+          _suvatSolutions[1][otherUnknown] = calculateU(_suvatSolutions[1], 's').last;
           break;
         case 'v':
-          tSolutions = calculateT(values, 'v');
-
-          _suvatSolutions[0]['t'] = tSolutions.first;
-          _suvatSolutions[1]['t'] = tSolutions.last;
-
-          // t is now known, so there is only one possible u for each solution
-          _suvatSolutions[0]['v'] = calculateV(_suvatSolutions[0], 's').first;
-          _suvatSolutions[1]['v'] = calculateV(_suvatSolutions[1], 's').last;
+          _suvatSolutions[0][otherUnknown] = calculateV(_suvatSolutions[0], 's').first;
+          _suvatSolutions[1][otherUnknown] = calculateV(_suvatSolutions[1], 's').last;
           break;
       }
     } else {
@@ -243,7 +238,7 @@ class _SuvatFormState extends State<SuvatForm> {
         _suvatSolutions[1][key] = null;
       });
 
-      // calculate answer as usual
+      // calculate answers as usual
       values.forEach((key, value) {
         if (missingVariablesNames.contains(key)){
           String otherUnknown = missingVariablesNames[1-missingVariablesNames.indexOf(key)];
