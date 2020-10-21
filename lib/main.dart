@@ -346,6 +346,17 @@ class _SuvatFormState extends State<SuvatForm> {
   }
 
   @override
+  void initState() {
+    // manually set initial values of _suvatSolutions
+    // this ensures that these two maps are of the correct type for being displayed
+    Map<String, double> map1 = new Map.from(_suvatValues);
+    Map<String, double> map2 = new Map.from(_suvatValues);
+    _suvatSolutions[0] = map1;
+    _suvatSolutions[1] = map2;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Widget form = Form(
       key: _formKey,
