@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 
+// an exception with custom text
+class CustomException implements Exception {
+  String cause;
+  CustomException(this.cause);
+}
+
 void main() {
   runApp(MyApp());
 }
@@ -40,12 +46,6 @@ class _FormPageState extends State<FormPage> {
   Widget build(BuildContext context) {
     return SuvatForm();
   }
-}
-
-// an exception with custom text
-class CustomException implements Exception {
-  String cause;
-  CustomException(this.cause);
 }
 
 class SuvatForm extends StatefulWidget {
@@ -281,66 +281,63 @@ class _SuvatFormState extends State<SuvatForm> {
     }
   }
 
-  void suvatVerify(){
-    if (_formKey.currentState.validate()) {
-      // perform functions below if no strings appear in the form fields
-      if (countNullsInMap(_suvatValues) == 2){
-        // everything looks good!
-        setState(() {});
-        suvatCalculation(_suvatValues);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SecondRoute()),
-        );
-      } else {
-        // an invalid number of fields are filled
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false, // user must tap button!
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text('Exactly three values must be specified'),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      }
+  void processSuvatInputs(){
+    if (countNullsInMap(_suvatValues) == 2){
+      // everything looks good!
+      setState(() {});
+      suvatCalculation(_suvatValues);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SuvatSolutions()),
+      );
+    } else {
+      // an invalid number of fields are filled
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Exactly three values must be specified'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
   Widget bottomBar() {
     return BottomAppBar(
       child: Row(children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: RaisedButton(
-                  child: Text('Reset'),
-                  onPressed: () {
-                    _formKey.currentState.reset();
-                    _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
-                  }
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: RaisedButton(
-                  child: Text('View Previous'),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SecondRoute()),
-                    );
-                  },
-                ),
-              ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 5),
+          child: RaisedButton(
+            child: Text('Reset'),
+            onPressed: () {
+              _formKey.currentState.reset();
+              _suvatValues = {'s': null, 'u': null, 'v': null, 'a': null, 't': null};
+            }
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 5),
+          child: RaisedButton(
+            child: Text('View Previous'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SuvatSolutions()),
+              );
+            },
+          ),
+        ),
             ],),
     );
   }
@@ -349,7 +346,9 @@ class _SuvatFormState extends State<SuvatForm> {
   Widget submitButton() {
     return FloatingActionButton.extended(
       onPressed: () {
-        suvatVerify();
+        if (_formKey.currentState.validate()) {
+          processSuvatInputs();
+        }
       },
       label: Text('Submit!'),
       icon: Icon(Icons.check),
@@ -401,7 +400,7 @@ class _SuvatFormState extends State<SuvatForm> {
 
 // this stateless widget takes solutions from the state of the suvat form
 // and displays them
-class SecondRoute extends StatelessWidget {
+class SuvatSolutions extends StatelessWidget {
   Widget showSolutionBlock(Map<String, double> solutionSet)
   {
     List<Widget> columnItems = new List<Widget>();
@@ -409,9 +408,9 @@ class SecondRoute extends StatelessWidget {
     for(String item in 'suvat'.split('')) {
       columnItems.add(SizedBox(height: 10));
       columnItems.add(Text(
-                    _SuvatFormState._suvatNames[item].toString(),
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ));
+        _SuvatFormState._suvatNames[item].toString(),
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ));
       columnItems.add(Text(solutionSet[item].toString()));
     }
     return new Column(children: columnItems);
@@ -426,16 +425,17 @@ class SecondRoute extends StatelessWidget {
       body: Container(
         padding: EdgeInsets.all(10),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
               children: [
-                Spacer(flex: 2),
+                Spacer(),
                 showSolutionBlock(_SuvatFormState._suvatSolutions[0]),
                 // show large spacer - only if this is an ambiguous case
-                _SuvatFormState._ambiguousCase? Spacer(flex: 3): SizedBox.shrink(),
+                _SuvatFormState._ambiguousCase? Spacer(flex: 3) : SizedBox.shrink(),
                 // show solutions[1] - only if this is an ambiguous case
-                _SuvatFormState._ambiguousCase? showSolutionBlock(_SuvatFormState._suvatSolutions[1]):SizedBox.shrink(),
-                Spacer(flex: 2)
+                _SuvatFormState._ambiguousCase? showSolutionBlock(_SuvatFormState._suvatSolutions[1]) : SizedBox.shrink(),
+                Spacer(),
               ]
             ),
           ]
