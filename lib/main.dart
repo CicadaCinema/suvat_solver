@@ -28,27 +28,15 @@ class MyApp extends StatelessWidget {
         ),
       ),
       // initially go to form page - to get inputs from user
-      home: FormPage(title: 'Solver'),
+      home: SuvatForm(title: 'Solver'),
     );
   }
 }
 
-class FormPage extends StatefulWidget {
-  FormPage({Key key, this.title}) : super(key: key);
+class SuvatForm extends StatefulWidget {
+  SuvatForm({Key key, this.title}) : super(key: key);
   final String title;
 
-  @override
-  _FormPageState createState() => _FormPageState();
-}
-
-class _FormPageState extends State<FormPage> {
-  @override
-  Widget build(BuildContext context) {
-    return SuvatForm();
-  }
-}
-
-class SuvatForm extends StatefulWidget {
   @override
   _SuvatFormState createState() => _SuvatFormState();
 }
