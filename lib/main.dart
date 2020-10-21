@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// it looks like this package is unnecessary
+// import 'package:flutter/services.dart';
 import 'dart:math';
 
 // an exception with custom text
@@ -203,7 +204,7 @@ class _SuvatFormState extends State<SuvatForm> {
       }
     });
 
-    // assign known values to both solution sets
+    // assign known values to both solution sets - now only the unknown values need to be filled in
     // two additional maps must be explicitly created to copy the 'values' map instead of referencing it
     Map<String, double> map1 = new Map.from(values);
     Map<String, double> map2 = new Map.from(values);
@@ -233,48 +234,45 @@ class _SuvatFormState extends State<SuvatForm> {
           break;
       }
     } else {
-      // clear the second solution set because it won't be used
-      values.forEach((key, value) {
-        _suvatSolutions[1][key] = null;
-      });
-
-      // calculate answers as usual
+      // loop over each input value and check if it is unknown
       values.forEach((key, value) {
         if (missingVariablesNames.contains(key)){
+          // get the key/name of the OTHER unknown value
           String otherUnknown = missingVariablesNames[1-missingVariablesNames.indexOf(key)];
+
+          // find the unknown value, specifying the other unknown when needed
+          Set<double> result;
           switch (key) {
             case 's':
-              _suvatSolutions[0][key] = calculateS(values, otherUnknown).first;
+              result = calculateS(values, otherUnknown);
               break;
             case 'u':
-              _suvatSolutions[0][key] = calculateU(values, otherUnknown).first;
+              result = calculateU(values, otherUnknown);
               break;
             case 'v':
-              _suvatSolutions[0][key] = calculateV(values, otherUnknown).first;
+              result = calculateV(values, otherUnknown);
               break;
             case 'a':
-              _suvatSolutions[0][key] = calculateA(values, otherUnknown).first;
+              result = calculateA(values, otherUnknown);
               break;
             case 't':
-              _suvatSolutions[0][key] = calculateT(values, otherUnknown).first;
+              result = calculateT(values, otherUnknown);
               break;
           }
+          // add this unknown value (certainly only one solution) to the solution set
+          _suvatSolutions[0][key] = result.first;
         }
       });
     }
   }
 
   void processSuvatInputs(){
+    // two fields are left blank
     if (countNullsInMap(_suvatValues) == 2){
-      // everything looks good!
-      setState(() {});
+      setState(() {}); // not sure why this is needed
       suvatCalculation(_suvatValues);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SuvatSolutions()),
-      );
+    // an invalid number of fields are filled
     } else {
-      // an invalid number of fields are filled
       showDialog<void>(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -296,11 +294,13 @@ class _SuvatFormState extends State<SuvatForm> {
     }
   }
 
+  // build the bottom bar
   Widget bottomBar() {
     return BottomAppBar(
       child: Row(children: [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 5),
+          // reset suvat inputs
           child: RaisedButton(
             child: Text('Reset'),
             onPressed: () {
@@ -311,6 +311,7 @@ class _SuvatFormState extends State<SuvatForm> {
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 5),
+          // go to the solutions page without solving suvats to view the previous solution set
           child: RaisedButton(
             child: Text('View Previous'),
             onPressed: () {
@@ -321,16 +322,21 @@ class _SuvatFormState extends State<SuvatForm> {
             },
           ),
         ),
-            ],),
+      ],),
     );
   }
 
   // the large 'Submit' button
   Widget submitButton() {
     return FloatingActionButton.extended(
+      // if the form validates, solve for the two unknown values and go to the solutions page
       onPressed: () {
         if (_formKey.currentState.validate()) {
           processSuvatInputs();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SuvatSolutions()),
+          );
         }
       },
       label: Text('Submit!'),
@@ -349,6 +355,10 @@ class _SuvatFormState extends State<SuvatForm> {
           children: <Widget>[
             // create lots of TextFormField textboxes
             for(String item in 'suvat'.split('')) TextFormField(
+              // validator first ensures that the field CAN be parsed as a number
+              // then it adds the value to the map of inputs and returns without an error
+              // a blank input also counts as vaid - but the corresponding input in the values
+              // map is filled in as null - signifying an unknown to be determined
               validator: (value) {
                 if (value != '') {
                   if (double.tryParse(value) == null){
@@ -381,19 +391,22 @@ class _SuvatFormState extends State<SuvatForm> {
   }
 }
 
-// this stateless widget takes solutions from the state of the suvat form
-// and displays them
+// this stateless widget takes solutions from the state of the suvat form and displays them
 class SuvatSolutions extends StatelessWidget {
+  // this method returns a nicely formatted column corresponding to the solution set provided as input
   Widget showSolutionBlock(Map<String, double> solutionSet)
   {
     List<Widget> columnItems = new List<Widget>();
 
     for(String item in 'suvat'.split('')) {
+      // fixed padding
       columnItems.add(SizedBox(height: 10));
+      // variable name in bold
       columnItems.add(Text(
         _SuvatFormState._suvatNames[item].toString(),
         style: TextStyle(fontWeight: FontWeight.bold),
       ));
+      // variable value
       columnItems.add(Text(solutionSet[item].toString()));
     }
     return new Column(children: columnItems);
@@ -413,6 +426,7 @@ class SuvatSolutions extends StatelessWidget {
             Row(
               children: [
                 Spacer(),
+                // always show first solution set
                 showSolutionBlock(_SuvatFormState._suvatSolutions[0]),
                 // show large spacer - only if this is an ambiguous case
                 _SuvatFormState._ambiguousCase? Spacer(flex: 3) : SizedBox.shrink(),
@@ -424,6 +438,7 @@ class SuvatSolutions extends StatelessWidget {
           ]
         ),
       ),
+      // allow user to pop back to the previous screen
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.pop(context);
